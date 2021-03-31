@@ -52,3 +52,12 @@ spec:
             value: "aerospike-kubernetes-operator"
           - name: LOG_LEVEL
             value: debug
+          readinessProbe:
+            exec:
+              command:
+              - stat
+              - "/tmp/cert"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 1
