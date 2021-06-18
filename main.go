@@ -7,21 +7,15 @@ import (
 	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
-	asdbv1alpha1 "github.com/aerospike/aerospike-kubernetes-operator/api/v1alpha1"
-	aerospikecluster "github.com/aerospike/aerospike-kubernetes-operator/controllers"
-	"github.com/aerospike/aerospike-kubernetes-operator/pkg/configschema"
-	"github.com/aerospike/aerospike-management-lib/asconfig"
+
 	k8Runtime "k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
-	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
-	crclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -32,7 +26,6 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(asdbv1alpha1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -61,7 +54,6 @@ func main() {
 
 	// Create a new Cmd to provide shared dependencies and start components
 	options := ctrl.Options{
-		ClientBuilder:          &newClientBuilder{},
 		Scheme:                 scheme,
 		MetricsBindAddress:     metricsAddr,
 		Port:                   9443,
@@ -91,21 +83,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLog.Info("Init aerospike-server config schemas")
-	asconfig.InitFromMap(configschema.SchemaMap)
-
-	if err := (&aerospikecluster.AerospikeClusterReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("AerospikeCluster"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "AerospikeCluster")
-		os.Exit(1)
-	}
-	if err = (&asdbv1alpha1.AerospikeCluster{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "AerospikeCluster")
-		os.Exit(1)
-	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {
@@ -136,17 +113,4 @@ func getWatchNamespace() (string, error) {
 		return "", fmt.Errorf("%s must be set", watchNamespaceEnvVar)
 	}
 	return ns, nil
-}
-
-// TODO: Verify: without this reconciler was picking object from cache.
-// reconciler was getting empty object... only having values set by mutating webhook
-type newClientBuilder struct{}
-
-func (n *newClientBuilder) WithUncached(objs ...crclient.Object) manager.ClientBuilder {
-	return n
-}
-
-func (n *newClientBuilder) Build(cache cache.Cache, config *rest.Config, options crclient.Options) (crclient.Client, error) {
-	// Create the Client for Write operations.
-	return crclient.New(config, options)
 }

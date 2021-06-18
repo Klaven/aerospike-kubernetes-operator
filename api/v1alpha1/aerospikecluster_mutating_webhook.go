@@ -23,7 +23,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	"github.com/aerospike/aerospike-kubernetes-operator/pkg/merge"
 	"github.com/go-logr/logr"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -147,8 +146,8 @@ func (r *AerospikeCluster) updateRacksAerospikeConfigFromGlobal(aslog logr.Logge
 		var err error
 		if rack.InputAerospikeConfig != nil {
 			// Merge this rack's and global config.
-			m, err = merge.Merge(r.Spec.AerospikeConfig.Value, rack.InputAerospikeConfig.Value)
-			aslog.V(1).Info("Merged rack config from global aerospikeConfig", "rack id", rack.ID, "rackAerospikeConfig", m, "globalAerospikeConfig", r.Spec.AerospikeConfig)
+			//m, err = merge.Merge(r.Spec.AerospikeConfig.Value, rack.InputAerospikeConfig.Value)
+			//aslog.V(1).Info("Merged rack config from global aerospikeConfig", "rack id", rack.ID, "rackAerospikeConfig", m, "globalAerospikeConfig", r.Spec.AerospikeConfig)
 			if err != nil {
 				return err
 			}
