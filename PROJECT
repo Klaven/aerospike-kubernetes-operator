@@ -1,7 +1,7 @@
 domain: aerospike.com
 layout: go.kubebuilder.io/v3
 projectName: aerospike-kubernetes-operator
-repo: github.com/aerospike/aerospike-kubernetes-operator
+repo: github.com/Klaven/aerospike-kubernetes-operator
 resources:
 - crdVersion: v1
   group: asdb
