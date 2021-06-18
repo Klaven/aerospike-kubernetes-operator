@@ -1,4 +1,4 @@
-module github.com/aerospike/aerospike-kubernetes-operator
+module github.com/klaven/aerospike-kubernetes-operator
 
 go 1.15
 
